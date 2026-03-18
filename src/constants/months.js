@@ -1,0 +1,15 @@
+export const months = [
+  { value: "ALL", label: "Toate" },
+  { value: "01", label: "Ianuarie" },
+  { value: "02", label: "Februarie" },
+  { value: "03", label: "Martie" },
+  { value: "04", label: "Aprilie" },
+  { value: "05", label: "Mai" },
+  { value: "06", label: "Iunie" },
+  { value: "07", label: "Iulie" },
+  { value: "08", label: "August" },
+  { value: "09", label: "Septembrie" },
+  { value: "10", label: "Octombrie" },
+  { value: "11", label: "Noiembrie" },
+  { value: "12", label: "Decembrie" },
+];

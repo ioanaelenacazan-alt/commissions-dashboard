@@ -11,75 +11,67 @@ function SideBar({
   setIncludeDemoDelivery,
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div>
-          <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">
-            Filtre
-          </h3>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 className="font-semibold mb-3 text-gray-500">FILTRE</h3>
 
-          <label className="flex items-center gap-3 mb-3 text-gray-800">
-            <input
-              type="checkbox"
-              checked={showConsultants}
-              onChange={() => setShowConsultants(!showConsultants)}
-              className="w-4 h-4"
-            />
-            <span>Consultanți</span>
-          </label>
+        <label className="block mb-2">
+          <input
+            type="checkbox"
+            checked={showConsultants}
+            onChange={(e) => setShowConsultants(e.target.checked)}
+            className="mr-2"
+          />
+          Consultanți
+        </label>
 
-          <label className="flex items-center gap-3 text-gray-800">
-            <input
-              type="checkbox"
-              checked={showTeamLeaders}
-              onChange={() => setShowTeamLeaders(!showTeamLeaders)}
-              className="w-4 h-4"
-            />
-            <span>Team Leaders</span>
-          </label>
-        </div>
+        <label className="block">
+          <input
+            type="checkbox"
+            checked={showTeamLeaders}
+            onChange={(e) => setShowTeamLeaders(e.target.checked)}
+            className="mr-2"
+          />
+          Team Leaders
+        </label>
+      </div>
 
-        <div>
-          <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">
-            Categorie
-          </h3>
+      <div>
+        <h3 className="font-semibold mb-3 text-gray-500">CATEGORII COMISION</h3>
 
-          <label className="flex items-center gap-3 mb-3 text-gray-800">
-            <input
-              type="checkbox"
-              checked={showTM6}
-              onChange={() => setShowTM6(!showTM6)}
-              className="w-4 h-4"
-            />
-            <span>TM6</span>
-          </label>
+        <label className="block mb-2">
+          <input
+            type="checkbox"
+            checked={showTM6}
+            onChange={(e) => setShowTM6(e.target.checked)}
+            className="mr-2"
+          />
+          TM6
+        </label>
 
-          <label className="flex items-center gap-3 text-gray-800">
-            <input
-              type="checkbox"
-              checked={showAccessories}
-              onChange={() => setShowAccessories(!showAccessories)}
-              className="w-4 h-4"
-            />
-            <span>Accesorii</span>
-          </label>
-        </div>
+        <label className="block">
+          <input
+            type="checkbox"
+            checked={showAccessories}
+            onChange={(e) => setShowAccessories(e.target.checked)}
+            className="mr-2"
+          />
+          Accesorii
+        </label>
+      </div>
 
-        <div>
-          <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">
-            Demo Delivery
-          </h3>
+      <div>
+        <h3 className="font-semibold mb-3 text-gray-500">EXTRA</h3>
 
-          <label className="flex items-center gap-3 text-gray-800">
-            <input
-              type="checkbox"
-              checked={includeDemoDelivery}
-              onChange={() => setIncludeDemoDelivery(!includeDemoDelivery)}
-              className="w-4 h-4"
-            />
-            <span>Include +30€</span>
-          </label>
-        </div>
+        <label className="block">
+          <input
+            type="checkbox"
+            checked={includeDemoDelivery}
+            onChange={(e) => setIncludeDemoDelivery(e.target.checked)}
+            className="mr-2"
+          />
+          Include +30€ Demo Delivery
+        </label>
       </div>
     </div>
   );

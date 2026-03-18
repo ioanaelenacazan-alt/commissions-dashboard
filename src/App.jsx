@@ -1,198 +1,378 @@
-import { useMemo, useState } from "react";
-import Header from "./layout/Header";
-import TopBar from "./layout/TopBar";
-import SideBar from "./layout/SideBar";
-import ExcelUploader from "./components/ExcelUploader";
+import { useEffect, useMemo, useState } from "react";
+import { buildPeople } from "./utils/commissions";
+import { readExcelFile } from "./utils/readExcelFile";
+import { exportCommissionPdf } from "./utils/exportCommissionPdf";
+import { months } from "./constants/months";
+import useManualPeople from "./hooks/useManualPeople";
+
+import ControlPanel from "./components/ControlPanel";
+import PersonForm from "./components/PersonForm";
 import PersonCard from "./components/PersonCard";
+import EmptyState from "./components/EmptyState";
+import Header from "./layout/Header";
 
-function getMonthFromDate(rawValue) {
-  if (!rawValue) return "";
+function dedupePeople(list) {
+  const map = new Map();
 
-  const value = String(rawValue).trim();
+  list.forEach((person) => {
+    const key = `${person.name}-${person.role}`;
+    const existing = map.get(key);
 
-  if (value.includes("/")) {
-    const parts = value.split("/");
-    if (parts.length >= 2) {
-      return parts[1].padStart(2, "0");
+    if (!existing) {
+      map.set(key, person);
+      return;
     }
-  }
 
-  if (value.includes(".")) {
-    const parts = value.split(".");
-    if (parts.length >= 2) {
-      return parts[1].padStart(2, "0");
+    if (person.source === "manual") {
+      map.set(key, person);
     }
-  }
-
-  if (value.includes("-")) {
-    const parts = value.split("-");
-    if (parts.length >= 3) {
-      return parts[1].padStart(2, "0");
-    }
-  }
-
-  return "";
-}
-
-function App() {
-  const [excelData, setExcelData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
-
-  const [showConsultants, setShowConsultants] = useState(true);
-  const [showTeamLeaders, setShowTeamLeaders] = useState(true);
-
-  const [showTM6, setShowTM6] = useState(true);
-  const [showAccessories, setShowAccessories] = useState(true);
-
-  const [includeDemoDelivery, setIncludeDemoDelivery] = useState(false);
-
-  const groupedPeople = useMemo(() => {
-    const map = {};
-
-    excelData.forEach((row) => {
-      const consultantName = row.CONSULTANT?.toString().trim();
-      const teamLeaderName = row.TL?.toString().trim();
-      const item = row.ITEM?.toString().trim().toUpperCase() || "";
-
-      const accCommission =
-        parseFloat(
-          String(row.ACC_COMISION || "0")
-            .replace(/\./g, "")
-            .replace(",", ".")
-            .trim()
-        ) || 0;
-
-      const month = getMonthFromDate(row.DATA);
-
-      const passesMonthFilter = selectedMonth ? month === selectedMonth : true;
-      if (!passesMonthFilter) return;
-
-      const isTM6 = item.includes("TM6");
-
-      if (consultantName) {
-        if (!map[consultantName]) {
-          map[consultantName] = {
-            name: consultantName,
-            role: "Consultant",
-            tm6: 0,
-            accessories: 0,
-          };
-        }
-
-        if (isTM6) {
-          map[consultantName].tm6 += 1;
-        }
-
-        map[consultantName].accessories += accCommission;
-      }
-
-      if (teamLeaderName) {
-        if (!map[teamLeaderName]) {
-          map[teamLeaderName] = {
-            name: teamLeaderName,
-            role: "Team Leader",
-            tm6: 0,
-            accessories: 0,
-          };
-        }
-
-        if (isTM6) {
-          map[teamLeaderName].tm6 += 1;
-        }
-
-        map[teamLeaderName].accessories += accCommission;
-      }
-    });
-
-    return Object.values(map).map((person) => {
-      const tm6Commission =
-        person.tm6 >= 3
-          ? person.tm6 * 120
-          : person.tm6 >= 1
-          ? person.tm6 * 100
-          : 0;
-
-      const demoDeliveryValue = includeDemoDelivery && person.tm6 > 0 ? 30 : 0;
-
-      return {
-        ...person,
-        total: tm6Commission + person.accessories + demoDeliveryValue,
-      };
-    });
-  }, [excelData, selectedMonth, includeDemoDelivery]);
-
-  const filteredPeople = groupedPeople.filter((person) => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-
-    const roleFilter =
-      (person.role === "Consultant" && showConsultants) ||
-      (person.role === "Team Leader" && showTeamLeaders);
-
-    const searchFilter =
-      !normalizedSearch || person.name.toLowerCase().includes(normalizedSearch);
-
-    return roleFilter && searchFilter;
   });
 
+  return Array.from(map.values());
+}
+
+function dedupeOptions(options) {
+  const seen = new Set();
+
+  return options.filter((option) => {
+    if (seen.has(option.value)) return false;
+    seen.add(option.value);
+    return true;
+  });
+}
+
+function calculateTm6Commission(tm6Count) {
+  const count = Number(tm6Count) || 0;
+
+  if (count <= 0) return 0;
+  if (count >= 3) return count * 120;
+
+  return count * 100;
+}
+
+function enrichManualPerson(person, options) {
+  const tm6Count = Number(person.tm6Count) || 0;
+  const accessories = Number(person.accessories) || 0;
+  const demoDelivery = Number(person.demoDelivery) || 0;
+
+  const tm6CommissionRaw = calculateTm6Commission(tm6Count);
+
+  const tm6Commission = options.showTM6 ? tm6CommissionRaw : 0;
+  const visibleAccessories = options.showAccessories ? accessories : 0;
+  const visibleDemoDelivery = options.includeDemoDelivery ? demoDelivery : 0;
+
+  return {
+    ...person,
+    tm6Count,
+    accessories: visibleAccessories,
+    demoDelivery: visibleDemoDelivery,
+    tm6Commission,
+    totalCommission: tm6Commission + visibleAccessories + visibleDemoDelivery,
+  };
+}
+
+export default function App() {
+  const [fileName, setFileName] = useState("");
+  const [rows, setRows] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState("ALL");
+  const [selectedConsultant, setSelectedConsultant] = useState("ALL");
+  const [selectedTeamLeader, setSelectedTeamLeader] = useState("ALL");
+  const [showTM6, setShowTM6] = useState(true);
+  const [showAccessories, setShowAccessories] = useState(true);
+  const [includeDemoDelivery, setIncludeDemoDelivery] = useState(true);
+  const [error, setError] = useState("");
+
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  const {
+    manualPeople,
+    formData,
+    editingId,
+    handleChange,
+    handleSavePerson,
+    handleEditPerson,
+    handleDeletePerson,
+    resetForm,
+  } = useManualPeople(setError);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setError("");
+      setFileName(file.name);
+
+      const data = await readExcelFile(file);
+      setRows(data);
+
+      setSelectedMonth("ALL");
+      setSelectedConsultant("ALL");
+      setSelectedTeamLeader("ALL");
+    } catch (err) {
+      console.error(err);
+      setError("Eroare la citire Excel.");
+      setRows([]);
+      setFileName("");
+    }
+  };
+
+  const handleConsultantChange = (value) => {
+    setSelectedConsultant(value);
+    setSelectedTeamLeader("ALL");
+    setError("");
+  };
+
+  const handleTeamLeaderChange = (value) => {
+    setSelectedTeamLeader(value);
+    setSelectedConsultant("ALL");
+    setError("");
+  };
+
+  const result = useMemo(() => {
+    return buildPeople(rows, {
+      selectedMonth,
+      showTM6,
+      showAccessories,
+      includeDemoDelivery,
+    });
+  }, [rows, selectedMonth, showTM6, showAccessories, includeDemoDelivery]);
+
+  const consultantOptions = useMemo(() => {
+    return dedupeOptions([
+      { value: "ALL", label: "Toți consultanții" },
+      ...result.consultants.map((p) => ({
+        value: p.name,
+        label: p.name,
+      })),
+      ...manualPeople
+        .filter((p) => p.role === "Consultant")
+        .map((p) => ({
+          value: p.name,
+          label: p.name,
+        })),
+    ]);
+  }, [result.consultants, manualPeople]);
+
+  const teamLeaderOptions = useMemo(() => {
+    return dedupeOptions([
+      { value: "ALL", label: "Toți Team Leaderii" },
+      ...result.teamLeaders.map((p) => ({
+        value: p.name,
+        label: p.name,
+      })),
+      ...manualPeople
+        .filter((p) => p.role === "Team Leader")
+        .map((p) => ({
+          value: p.name,
+          label: p.name,
+        })),
+    ]);
+  }, [result.teamLeaders, manualPeople]);
+
+  const selectedPeople = useMemo(() => {
+    if (selectedConsultant !== "ALL") {
+      return dedupePeople([
+        ...result.consultants.filter((p) => p.name === selectedConsultant),
+        ...manualPeople
+          .filter(
+            (p) => p.role === "Consultant" && p.name === selectedConsultant,
+          )
+          .map((p) =>
+            enrichManualPerson(p, {
+              showTM6,
+              showAccessories,
+              includeDemoDelivery,
+            }),
+          ),
+      ]);
+    }
+
+    if (selectedTeamLeader !== "ALL") {
+      return dedupePeople([
+        ...result.teamLeaders.filter((p) => p.name === selectedTeamLeader),
+        ...manualPeople
+          .filter(
+            (p) => p.role === "Team Leader" && p.name === selectedTeamLeader,
+          )
+          .map((p) =>
+            enrichManualPerson(p, {
+              showTM6,
+              showAccessories,
+              includeDemoDelivery,
+            }),
+          ),
+      ]);
+    }
+
+    return [];
+  }, [
+    selectedConsultant,
+    selectedTeamLeader,
+    result.consultants,
+    result.teamLeaders,
+    manualPeople,
+    showTM6,
+    showAccessories,
+    includeDemoDelivery,
+  ]);
+
+  const handleManualSave = () => {
+    const savedPerson = handleSavePerson();
+
+    if (!savedPerson) return false;
+
+    if (savedPerson.role === "Consultant") {
+      setSelectedConsultant(savedPerson.name);
+      setSelectedTeamLeader("ALL");
+    }
+
+    if (savedPerson.role === "Team Leader") {
+      setSelectedTeamLeader(savedPerson.name);
+      setSelectedConsultant("ALL");
+    }
+
+    return savedPerson;
+  };
+
+  const handleExport = () => {
+    setError("");
+
+    if (selectedPeople.length === 0) {
+      setError(
+        "Selectează un consultant sau un team leader pentru export PDF.",
+      );
+      return;
+    }
+
+    exportCommissionPdf({
+      visiblePeople: selectedPeople.map((person) => ({
+        ...person,
+        tm6Count: Number(person.tm6Count) || 0,
+        accessories: Number(person.accessories) || 0,
+        demoDelivery: Number(person.demoDelivery) || 0,
+      })),
+      selectedMonth,
+      selectedConsultant,
+      selectedTeamLeader,
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      <div className="max-w-7xl mx-auto px-6 pt-4">
-        <ExcelUploader setExcelData={setExcelData} />
-      </div>
-
-      <TopBar
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-      />
-
-      <main className="max-w-7xl mx-auto px-6 py-6">
-        <div className="mb-6">
-          <SideBar
-            showConsultants={showConsultants}
-            setShowConsultants={setShowConsultants}
-            showTeamLeaders={showTeamLeaders}
-            setShowTeamLeaders={setShowTeamLeaders}
+        <div className="mt-6 space-y-8">
+          <ControlPanel
+            fileName={fileName}
+            error={error}
+            onFileUpload={handleFileUpload}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedConsultant={selectedConsultant}
+            setSelectedConsultant={handleConsultantChange}
+            selectedTeamLeader={selectedTeamLeader}
+            setSelectedTeamLeader={handleTeamLeaderChange}
+            consultantOptions={consultantOptions}
+            teamLeaderOptions={teamLeaderOptions}
+            months={months}
             showTM6={showTM6}
             setShowTM6={setShowTM6}
             showAccessories={showAccessories}
             setShowAccessories={setShowAccessories}
             includeDemoDelivery={includeDemoDelivery}
             setIncludeDemoDelivery={setIncludeDemoDelivery}
+            onExport={handleExport}
           />
-        </div>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {excelData.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 col-span-full">
-              <p className="text-gray-500 text-lg">Încarcă fișierul Excel.</p>
-            </div>
-          ) : filteredPeople.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 col-span-full">
-              <p className="text-gray-500 text-lg">
-                Nu există rezultate pentru filtrele selectate.
-              </p>
-            </div>
-          ) : (
-            filteredPeople.map((person, index) => (
-              <PersonCard
-                key={index}
-                name={person.name}
-                role={person.role}
-                tm6={person.tm6}
-                accessories={person.accessories}
-                total={person.total}
-              />
-            ))
+          <PersonForm
+            formData={formData}
+            editingId={editingId}
+            onChange={handleChange}
+            onSave={handleManualSave}
+            onCancel={resetForm}
+            error={error}
+          />
+
+          {manualPeople.length > 0 && (
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+                Persoane adăugate manual
+              </h2>
+
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {manualPeople.map((person) => (
+                  <div
+                    key={person.id}
+                    className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
+                  >
+                    <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                      {person.name}
+                    </h3>
+
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {person.role}
+                    </p>
+
+                    <div className="mt-3 space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                      <p>TM6: {person.tm6Count}</p>
+                      <p>Accesorii: {person.accessories}</p>
+                      <p>Demo Delivery: {person.demoDelivery}</p>
+                    </div>
+
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEditPerson(person)}
+                        className="rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        Editează
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePerson(person.id)}
+                        className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"
+                      >
+                        Șterge
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
-        </section>
-      </main>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              Rezultate comisioane
+            </h2>
+
+            {selectedPeople.length === 0 ? (
+              <EmptyState message="Selectează un consultant sau un team leader pentru a vedea comisionul." />
+            ) : (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {selectedPeople.map((person, index) => (
+                  <PersonCard key={person.id ?? index} person={person} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
-
-export default App;
