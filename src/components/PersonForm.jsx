@@ -43,13 +43,12 @@ export default function PersonForm({
             Persoană manuală
           </div>
 
-          <h2 className="mt-3 text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {isEditing ? "Editează persoană" : "Adăugare manuală"}
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            {isEditing ? "Editează" : "Adăugare persoanǎ"}
           </h2>
 
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Deschide formularul doar când ai nevoie să adaugi sau să modifici o
-            persoană.
+            Adaugă sau modifică rapid o persoană.
           </p>
         </div>
 
@@ -61,8 +60,8 @@ export default function PersonForm({
           {isEditing
             ? "Editezi persoana"
             : isOpen
-            ? "Închide formularul"
-            : "Adaugă persoană"}
+              ? "Închide formularul"
+              : "Adaugă persoană"}
         </button>
       </div>
 
