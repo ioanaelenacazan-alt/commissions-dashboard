@@ -25,7 +25,7 @@ export default function UploadCard({ fileName, error, onFileUpload }) {
         <button
           type="button"
           onClick={handleOpenFilePicker}
-          className="w-fit rounded-xl bg-emerald-600 px-4 py-2 font-medium text-white transition hover:bg-emerald-700"
+          className="w-fit rounded-xl bg-emerald-700 px-4 py-2 font-medium text-white transition hover:bg-emerald-700"
         >
           Alege fișier
         </button>

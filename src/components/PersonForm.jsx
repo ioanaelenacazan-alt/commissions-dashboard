@@ -55,7 +55,7 @@ export default function PersonForm({
         <button
           type="button"
           onClick={handleToggle}
-          className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+          className="rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
         >
           {isEditing
             ? "Editezi persoana"
