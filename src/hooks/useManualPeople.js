@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const initialFormData = {
   name: "",
@@ -97,11 +98,13 @@ export default function useManualPeople(setError) {
 
     if (!cleanName) {
       setError("Te rog completează numele.");
+      toast.error("Te rog completează numele."); // 👈 AICI
       return false;
     }
 
     if (normalizedRole !== "Consultant" && normalizedRole !== "Team Leader") {
       setError("Rolul trebuie să fie Consultant sau Team Leader.");
+      toast.error("Rol invalid."); // 👈 AICI
       return false;
     }
 
@@ -141,11 +144,14 @@ export default function useManualPeople(setError) {
 
     if (editingId) {
       setManualPeople((prev) =>
-        prev.map((person) => (person.id === editingId ? personToSave : person))
+        prev.map((person) => (person.id === editingId ? personToSave : person)),
       );
     } else {
       setManualPeople((prev) => [...prev, personToSave]);
     }
+
+    // 👇 AICI
+    toast.success(editingId ? "Persoană actualizată!" : "Persoană adăugată!");
 
     resetForm();
     return personToSave;

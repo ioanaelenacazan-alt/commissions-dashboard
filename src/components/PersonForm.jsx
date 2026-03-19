@@ -119,14 +119,12 @@ export default function PersonForm({
                 Accesorii (lei)
               </label>
               <input
-                type="number"
-                min="0"
-                step="0.01"
+                type="text"
                 inputMode="decimal"
                 name="accessories"
                 value={formData.accessories}
                 onChange={onChange}
-                placeholder="0.00"
+                placeholder="0,00"
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-emerald-900/40"
               />
             </div>
@@ -137,8 +135,8 @@ export default function PersonForm({
               </label>
               <input
                 type="number"
-                min="0"
-                step="1"
+                min="50"
+                step="10"
                 inputMode="numeric"
                 name="demoDelivery"
                 value={formData.demoDelivery}
