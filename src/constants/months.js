@@ -1,5 +1,5 @@
 export const months = [
-  { value: "ALL", label: "Toate" },
+  { value: "ALL", label: "Toate Lunile" },
   { value: "01", label: "Ianuarie" },
   { value: "02", label: "Februarie" },
   { value: "03", label: "Martie" },
