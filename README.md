@@ -2,8 +2,18 @@
 
 Aplicație web pentru calculul rapid al comisioanelor consultanților și team leaderilor, pe baza unui fișier Excel.
 
+---
+
 ## 📸 Preview
-![App Screenshot](./public/screenshot.png)
+
+## ![App Screenshot](./public/screenshot.png)
+
+---
+
+## 🌐 Demo
+https://commissions-dashboard-three.vercel.app/
+
+
 ---
 
 ## 🚀 Funcționalități
@@ -31,15 +41,18 @@ Aplicație web pentru calculul rapid al comisioanelor consultanților și team l
 ---
 
 ## 📁 Structura proiectului
+
 src/
 components/
 hooks/
 utils/
 constants/
 layout/
+
 ---
 
 ## ⚙️ Instalare și rulare
+
 git clone <repo-url>
 cd app-thermomix
 npm install
@@ -80,4 +93,4 @@ Aplicația va rula pe: http://localhost:5173
 
 ## 👩‍💻 Autor
 
-Ioana Cazan 
+Ioana Cazan
