@@ -11,3 +11,4 @@ export default function ToggleOption({ checked, onChange, children }) {
     </label>
   );
 }
+// Permite activarea/dezactivarea unor opțiuni.checkbox styled

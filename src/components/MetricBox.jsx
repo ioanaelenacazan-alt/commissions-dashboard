@@ -11,3 +11,4 @@ export default function MetricBox({ label, value }) {
     </div>
   );
 }
+// Afișează metrici rapide (ex: totaluri).

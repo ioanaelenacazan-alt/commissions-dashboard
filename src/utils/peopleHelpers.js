@@ -54,3 +54,4 @@ export function enrichManualPerson(person) {
     totalCommission: tm6Commission + accessories + demoDelivery,
   };
 }
+// gestionează persoane și elimină duplicate

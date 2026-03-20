@@ -17,3 +17,10 @@ export default function useDarkMode() {
 
   return { darkMode, setDarkMode };
 }
+// Controlează dark mode și îl salvează pentru utilizator
+// salvează în localStorage
+// adaugă sau scoate clasa dark din <html>
+// Tailwind folosește .dark pe <html> și schimbă automat culorile
+// state (darkMode)
+// localStorage
+// class dark pe html

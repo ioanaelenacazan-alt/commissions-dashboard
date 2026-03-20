@@ -8,3 +8,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <App />
   </React.StrictMode>
 )
+// inițializează aplicația și o montează în DOM.

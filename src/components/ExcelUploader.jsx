@@ -31,3 +31,4 @@ export default function ExcelUploader({ onFileSelect, fileName }) {
     </div>
   );
 }
+// Gestionează procesul de citire și transformare a fișierului Excel.

@@ -19,3 +19,5 @@ export async function readExcelFile(file) {
 
   return normalizeExcelRows(jsonData);
 }
+
+// citește fișierul Excel și îl transformă în JSON

@@ -5,3 +5,5 @@ export default function EmptyState({ message }) {
     </div>
   );
 }
+
+// Se afișează când nu există date încă.

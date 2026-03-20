@@ -48,3 +48,5 @@ function TopBar({
 }
 
 export default TopBar;
+
+// permite căutarea și filtrarea pe lună

@@ -168,3 +168,10 @@ export default function useManualPeople(setError) {
     resetForm,
   };
 }
+
+// Este hook-ul care gestionează complet datele introduse manual, 
+// de la validare până la persistare în localStorage
+
+// ține lista de persoane (state)
+// validează datele (ex: valori corecte)
+// salvează în localStorage

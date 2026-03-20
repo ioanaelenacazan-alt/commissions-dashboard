@@ -17,3 +17,4 @@ export default function FilterSelect({ label, value, onChange, options }) {
     </div>
   );
 }
+// Dropdown reutilizabil pentru selectarea filtrelor.

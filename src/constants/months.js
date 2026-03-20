@@ -13,3 +13,4 @@ export const months = [
   { value: "11", label: "Noiembrie" },
   { value: "12", label: "Decembrie" },
 ];
+// Este un hook custom care conține logică, nu interfață.

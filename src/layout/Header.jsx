@@ -43,3 +43,5 @@ function Header({ darkMode, setDarkMode }) {
 }
 
 export default Header;
+// Header-ul afișează titlul aplicației 
+//permite activarea dark mode.

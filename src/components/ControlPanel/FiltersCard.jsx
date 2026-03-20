@@ -73,3 +73,5 @@ export default function FiltersCard({
     </div>
   );
 }
+
+// Componenta care gestionează filtrele precum lună, consultant sau team leader.

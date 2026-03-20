@@ -103,3 +103,8 @@ export function buildPeople(rows = [], filters = {}) {
     teamLeaders: buildGroup(rows, "teamLeader", "Team Leader", filters),
   };
 }
+// calculează comisioanele pe baza datelor
+
+// calcule TM6
+// totaluri
+// grupare persoane

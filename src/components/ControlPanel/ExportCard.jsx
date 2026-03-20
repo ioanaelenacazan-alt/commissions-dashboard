@@ -19,3 +19,4 @@ export default function ExportCard({ onExport, onReset }) {
     </div>
   );
 }
+// Permite exportul rezultatelor în format PDF.

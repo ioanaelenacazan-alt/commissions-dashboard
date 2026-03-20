@@ -177,3 +177,4 @@ export default function PersonForm({
     </section>
   );
 }
+// Permite adăugarea sau editarea manuală a persoanelor și valorilor.
