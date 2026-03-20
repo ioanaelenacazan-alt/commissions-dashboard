@@ -119,3 +119,5 @@ export function exportCommissionPdf({
 
   doc.save("raport-comisioane.pdf");
 }
+
+// generează PDF-ul cu rezultatele

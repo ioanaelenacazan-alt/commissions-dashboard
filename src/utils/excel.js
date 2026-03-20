@@ -169,3 +169,8 @@ export function normalizeExcelRows(rows = []) {
     };
   });
 }
+
+// normalizează și validează datele din Excel
+// parseAmount
+// formate diferite
+// text → număr

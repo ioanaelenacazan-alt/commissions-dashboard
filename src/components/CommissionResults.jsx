@@ -22,3 +22,4 @@ export default function CommissionResults({ selectedPeople }) {
     </section>
   );
 }
+// CORE-ul UI -sunt afișate rezultatele calculate pentru comisioane.

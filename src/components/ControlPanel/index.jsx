@@ -38,3 +38,5 @@ export default function ControlPanel(props) {
     </section>
   );
 }
+
+// Aceasta combină toate componentele din zona de control.

@@ -96,3 +96,8 @@ export default function useCommissionSelection({
     selectedPeople,
   };
 }
+
+// hook care pregătește și filtrează datele pentru afișare, 
+// combinând datele din Excel cu cele introduse manual 
+// eliminând duplicatele.
+// Pentru a centraliza logica de filtrare și selecție într-un singur loc, separat de UI.

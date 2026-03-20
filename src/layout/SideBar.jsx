@@ -70,7 +70,7 @@ function SideBar({
             onChange={(e) => setIncludeDemoDelivery(e.target.checked)}
             className="mr-2"
           />
-          Include +30€ Demo Delivery
+          Include Demo Delivery
         </label>
       </div>
     </div>
@@ -78,3 +78,13 @@ function SideBar({
 }
 
 export default SideBar;
+
+//zona de filtre (checkbox-uri)
+
+//conține filtrele care controlează ce date sunt afișate
+
+//Idei cheie:
+// consultanți / team leaders
+// TM6 / accesorii
+// toggle-uri (on/off)
+// modifică rezultate

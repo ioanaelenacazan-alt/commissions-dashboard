@@ -48,3 +48,4 @@ export default function UploadCard({ fileName, error, onFileUpload }) {
     </div>
   );
 }
+// Upload Excel - Componenta care permite încărcarea fișierului Excel 

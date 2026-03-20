@@ -13,3 +13,4 @@ export default function TabButton({ active, onClick, children }) {
     </button>
   );
 }
+// Permite navigarea între diferite vizualizări.
