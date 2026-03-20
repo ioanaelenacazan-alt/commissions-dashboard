@@ -246,6 +246,8 @@ export default function App() {
     </>
   );
 }
+
+
 //gestionează state-ul principal și coordonează toate componentele.
 //ține datele
 //le trimite mai departe
